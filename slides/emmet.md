@@ -2,7 +2,7 @@
 title: Emmet (Visual Studio Code)
 version: 1.0.0
 header: Emmet (Visual Studio Code)
-footer: https://github.com/ti-iv-p1/slides
+footer: https://github.com/ti-iv-p1/slides/emmet
 paginate: true
 marp: true
 ---

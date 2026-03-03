@@ -3,7 +3,7 @@ title: Perintah Terminal Shell
 version: 1.0.0
 theme: react
 header: Perintah Terminal Shell
-footer: https://github.com/ti-iv-p1/slides
+footer: https://github.com/ti-iv-p1/slides/terminal
 paginate: true
 marp: true
 ---

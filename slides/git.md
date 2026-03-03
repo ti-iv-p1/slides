@@ -2,7 +2,7 @@
 title: Git
 version: 1.0.0
 header: Git
-footer: https://github.com/ti-iv-p1/slides
+footer: https://github.com/ti-iv-p1/slides/git
 paginate: true
 marp: true
 ---

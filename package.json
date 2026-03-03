@@ -1,0 +1,17 @@
+{
+  "name": "jumat-iii-p1",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "@marp-team/marp-cli": "^4.2.3"
+  },
+  "scripts": {
+    "cpi": "mkdir -p dist/images && (cp slides/images/* dist/images/ 2>/dev/null || true)",
+    "build": "npm run cpi && marp -I slides -o dist --theme slides/theme.css"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

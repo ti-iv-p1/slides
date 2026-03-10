@@ -27,3 +27,5 @@ Review Node.js dengan Handlebars dan SQLite
 - Menguasai Handlebars sebagai template engine SSR
 - Menggunakan SQLite dengan better-sqlite3
 - Membuat aplikasi web full-stack sederhana
+
+https://ti-iv-p1.github.io/slides/pertemuan-2

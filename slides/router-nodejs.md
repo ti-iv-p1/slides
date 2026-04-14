@@ -20,9 +20,10 @@ _paginate: skip
 
 - Memahami konsep routing dalam web application
 - Menguasai cara membuat routes di Express.js
-- Memahami HTTP methods (GET, POST, PUT, DELETE)
+- Memahami HTTP methods untuk web (GET, POST)
 - Mampu mengorganisir routes dengan Express Router
-- Menerapkan route parameters dan query strings
+- Menerapkan route parameters, query strings, dan form handling
+- Mengintegrasikan routing dengan template engine
 
 ---
 
@@ -34,10 +35,10 @@ _paginate: skip
 
 Contoh:
 
-- `GET /users` - mengambil daftar users
-- `POST /users` - membuat user baru
-- `GET /users/5` - mengambil user dengan id 5
-- `DELETE /users/5` - menghapus user dengan id 5
+- `GET /` - menampilkan halaman home
+- `GET /users` - menampilkan halaman daftar users
+- `GET /users/5` - menampilkan halaman detail user dengan id 5
+- `POST /users` - memproses form tambah user baru
 
 ---
 
@@ -60,14 +61,17 @@ app.METHOD(PATH, HANDLER);
 const express = require("express");
 const app = express();
 
-// GET request
+// Set view engine
+app.set("view engine", "ejs");
+
+// GET request - render home page
 app.get("/", (req, res) => {
-  res.send("Hello World!");
+  res.render("index", { title: "Home" });
 });
 
-// GET request dengan path berbeda
+// GET request - render about page
 app.get("/about", (req, res) => {
-  res.send("About Page");
+  res.render("about", { title: "About Us" });
 });
 
 app.listen(3000, () => {
@@ -77,50 +81,58 @@ app.listen(3000, () => {
 
 ---
 
-## HTTP Methods
+## HTTP Methods untuk Web Application
 
-**GET** - mengambil data
+**GET** - menampilkan halaman atau data
 
 ```javascript
 app.get("/users", (req, res) => {
-  res.json({ users: [] });
+  const users = [
+    { id: 1, name: "John" },
+    { id: 2, name: "Jane" },
+  ];
+  res.render("users/index", { users });
 });
 ```
 
-**POST** - membuat data baru
+**POST** - memproses form submission
 
 ```javascript
 app.post("/users", (req, res) => {
-  res.json({ message: "User created" });
-});
-```
-
-**PUT** - update data (full update)
-
-```javascript
-app.put("/users/:id", (req, res) => {
-  res.json({ message: "User updated" });
+  const { name, email } = req.body;
+  // Simpan user ke database
+  // Redirect setelah berhasil (Post-Redirect-Get pattern)
+  res.redirect("/users");
 });
 ```
 
 ---
 
-## HTTP Methods (lanjutan)
+## Static Files
 
-**PATCH** - update data (partial update)
+Serve static files (CSS, JavaScript, images):
 
 ```javascript
-app.patch("/users/:id", (req, res) => {
-  res.json({ message: "User partially updated" });
-});
+const express = require("express");
+const app = express();
+
+// Serve static files dari folder 'public'
+app.use(express.static("public"));
+
+// Akses: http://localhost:3000/css/style.css
+// File: public/css/style.css
 ```
 
-**DELETE** - menghapus data
+**Struktur folder:**
 
-```javascript
-app.delete("/users/:id", (req, res) => {
-  res.json({ message: "User deleted" });
-});
+```
+public/
+├── css/
+│   └── style.css
+├── js/
+│   └── script.js
+└── images/
+    └── logo.png
 ```
 
 ---
@@ -133,18 +145,21 @@ app.delete("/users/:id", (req, res) => {
 // Pattern: /users/:id
 app.get("/users/:id", (req, res) => {
   const userId = req.params.id;
-  res.send(`User ID: ${userId}`);
+  // Ambil data user dari database berdasarkan id
+  const user = { id: userId, name: "John Doe" };
+  res.render("users/show", { user });
 });
 
 // Multiple parameters
 app.get("/users/:userId/posts/:postId", (req, res) => {
   const { userId, postId } = req.params;
-  res.send(`User: ${userId}, Post: ${postId}`);
+  // Render halaman detail post dari user tertentu
+  res.render("posts/show", { userId, postId });
 });
 ```
 
 **Akses:** `http://localhost:3000/users/123`
-**Result:** `req.params.id = "123"`
+**Result:** Menampilkan halaman detail user dengan id 123
 
 ---
 
@@ -153,73 +168,79 @@ app.get("/users/:userId/posts/:postId", (req, res) => {
 **Query strings** adalah parameter setelah `?` di URL
 
 ```javascript
-app.get("/search", (req, res) => {
-  const keyword = req.query.q;
+app.get("/products", (req, res) => {
+  const category = req.query.category || "all";
   const page = req.query.page || 1;
 
-  res.json({
-    keyword: keyword,
-    page: page,
+  // Filter products berdasarkan category
+  const products = getProductsByCategory(category, page);
+
+  res.render("products/index", {
+    products,
+    category,
+    currentPage: page,
   });
 });
 ```
 
-**Akses:** `http://localhost:3000/search?q=nodejs&page=2`
-**Result:** `req.query.q = "nodejs"`, `req.query.page = "2"`
+**Akses:** `http://localhost:3000/products?category=electronics&page=2`
+**Result:** Menampilkan halaman produk kategori electronics halaman 2
 
 ---
 
-## Request Body
+## Form Handling
 
-Untuk data dari POST/PUT/PATCH request:
+Memproses data dari HTML form:
 
 ```javascript
-// Middleware untuk parsing JSON
-app.use(express.json());
+// Middleware untuk parsing form data
 app.use(express.urlencoded({ extended: true }));
 
+// GET - Tampilkan form
+app.get("/users/new", (req, res) => {
+  res.render("users/new");
+});
+
+// POST - Proses form
 app.post("/users", (req, res) => {
   const { name, email } = req.body;
-
-  res.json({
-    message: "User created",
-    data: { name, email },
-  });
+  // Simpan ke database
+  // Redirect ke halaman users (Post-Redirect-Get pattern)
+  res.redirect("/users");
 });
 ```
 
-**Client mengirim:**
+**HTML Form:**
 
-```json
-{
-  "name": "John Doe",
-  "email": "john@example.com"
-}
+```html
+<form action="/users" method="POST">
+  <input type="text" name="name" placeholder="Name" />
+  <input type="email" name="email" placeholder="Email" />
+  <button type="submit">Submit</button>
+</form>
 ```
 
 ---
 
-## Response Methods
+## Response Methods untuk Web App
 
 ```javascript
-// Send text
-res.send("Hello World");
+// Render template (halaman web)
+res.render("index", { title: "Home", user: currentUser });
 
-// Send JSON
-res.json({ message: "Success", data: [] });
-
-// Send status code
-res.status(404).send("Not Found");
-res.status(201).json({ message: "Created" });
-
-// Redirect
+// Redirect ke halaman lain
 res.redirect("/login");
+res.redirect("/users/" + userId);
 
-// Render view
-res.render("index", { title: "Home" });
+// Send HTML string
+res.send("<h1>Hello World</h1>");
+
+// Send status code dengan halaman custom
+res.status(404).render("errors/404");
+res.status(500).render("errors/500");
 
 // Download file
-res.download("/path/to/file.pdf");
+res.download("/files/report.pdf");
 ```
 
 ---
@@ -233,16 +254,22 @@ res.download("/path/to/file.pdf");
 const express = require("express");
 const router = express.Router();
 
+// GET /users - Tampilkan daftar users
 router.get("/", (req, res) => {
-  res.json({ users: [] });
+  const users = []; // Ambil dari database
+  res.render("users/index", { users });
 });
 
+// GET /users/:id - Tampilkan detail user
 router.get("/:id", (req, res) => {
-  res.json({ user: { id: req.params.id } });
+  const user = {}; // Ambil dari database
+  res.render("users/show", { user });
 });
 
+// POST /users - Proses form tambah user
 router.post("/", (req, res) => {
-  res.status(201).json({ message: "User created" });
+  // Simpan user
+  res.redirect("/users");
 });
 
 module.exports = router;
@@ -257,51 +284,56 @@ module.exports = router;
 const express = require("express");
 const app = express();
 
+// Set view engine
+app.set("view engine", "ejs");
+app.use(express.static("public"));
+app.use(express.urlencoded({ extended: true }));
+
 // Import router
 const userRoutes = require("./routes/users");
 const productRoutes = require("./routes/products");
 
 // Use router dengan prefix
-app.use("/api/users", userRoutes);
-app.use("/api/products", productRoutes);
+app.use("/users", userRoutes);
+app.use("/products", productRoutes);
 
 app.listen(3000);
 ```
 
 **Hasil:**
 
-- `/api/users` → GET all users
-- `/api/users/:id` → GET user by id
-- `/api/products` → GET all products
+- `/users` → Halaman daftar users
+- `/users/:id` → Halaman detail user
+- `/products` → Halaman daftar produk
 
 ---
 
-## Route Chaining
+## Post-Redirect-Get Pattern
 
-Menggabungkan multiple methods untuk satu path:
+**PRG Pattern** mencegah form re-submission saat refresh:
 
 ```javascript
-app
-  .route("/users")
-  .get((req, res) => {
-    res.json({ users: [] });
-  })
-  .post((req, res) => {
-    res.status(201).json({ message: "Created" });
-  });
+// GET - Tampilkan form
+app.get("/users/new", (req, res) => {
+  res.render("users/new");
+});
 
-app
-  .route("/users/:id")
-  .get((req, res) => {
-    res.json({ user: {} });
-  })
-  .put((req, res) => {
-    res.json({ message: "Updated" });
-  })
-  .delete((req, res) => {
-    res.json({ message: "Deleted" });
-  });
+// POST - Proses form, lalu redirect
+app.post("/users", (req, res) => {
+  const { name, email } = req.body;
+  const userId = saveUserToDatabase(name, email);
+  // Redirect setelah POST berhasil
+  res.redirect(`/users/${userId}`);
+});
+
+// GET - Tampilkan hasil
+app.get("/users/:id", (req, res) => {
+  const user = getUserFromDatabase(req.params.id);
+  res.render("users/show", { user });
+});
 ```
+
+✅ Menghindari duplicate submission saat user refresh halaman
 
 ---
 
@@ -318,7 +350,8 @@ const logger = (req, res, next) => {
 
 // Gunakan middleware
 app.get("/users", logger, (req, res) => {
-  res.json({ users: [] });
+  const users = [];
+  res.render("users/index", { users });
 });
 
 // Atau gunakan untuk semua routes
@@ -331,24 +364,23 @@ app.use(logger);
 
 ```javascript
 // middleware/auth.js
-const authenticateToken = (req, res, next) => {
-  const token = req.headers["authorization"];
-
-  if (!token) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
-
-  // Verify token (contoh sederhana)
-  if (token === "valid-token") {
-    next();
+const isAuthenticated = (req, res, next) => {
+  // Cek session atau cookie
+  if (req.session && req.session.userId) {
+    next(); // User sudah login
   } else {
-    res.status(403).json({ error: "Forbidden" });
+    // Redirect ke login page
+    res.redirect("/login");
   }
 };
 
-// Gunakan di route
-app.get("/protected", authenticateToken, (req, res) => {
-  res.json({ message: "This is protected" });
+// Gunakan di route yang perlu authentication
+app.get("/dashboard", isAuthenticated, (req, res) => {
+  res.render("dashboard", { user: req.session.user });
+});
+
+app.get("/profile", isAuthenticated, (req, res) => {
+  res.render("profile", { user: req.session.user });
 });
 ```
 
@@ -358,19 +390,24 @@ app.get("/protected", authenticateToken, (req, res) => {
 
 ```javascript
 const validate = (req, res, next) => {
-  if (!req.body.name) {
-    return res.status(400).json({ error: "Name is required" });
+  if (!req.body.name || !req.body.email) {
+    // Render form lagi dengan error message
+    return res.render("users/new", {
+      error: "Name and email are required",
+    });
   }
   next();
 };
 
 const sanitize = (req, res, next) => {
   req.body.name = req.body.name.trim();
+  req.body.email = req.body.email.trim().toLowerCase();
   next();
 };
 
 app.post("/users", validate, sanitize, (req, res) => {
-  res.json({ message: "User created" });
+  // Simpan user
+  res.redirect("/users");
 });
 ```
 
@@ -431,18 +468,28 @@ app.use("/api", routes);
 const express = require("express");
 const router = express.Router();
 const UserController = require("../controllers/userController");
-const { authenticate } = require("../middleware/auth");
+const { isAuthenticated } = require("../middleware/auth");
 
+// Tampilkan halaman daftar users
 router.get("/", UserController.index);
+
+// Tampilkan form tambah user
+router.get("/new", isAuthenticated, UserController.new);
+
+// Tampilkan detail user
 router.get("/:id", UserController.show);
-router.post("/", authenticate, UserController.create);
-router.put("/:id", authenticate, UserController.update);
-router.delete("/:id", authenticate, UserController.delete);
+
+// Proses form tambah user
+router.post("/", isAuthenticated, UserController.create);
+
+// Tampilkan form edit user
+router.get("/:id/edit", isAuthenticated, UserController.edit);
+
+// Proses form edit user
+router.post("/:id", isAuthenticated, UserController.update);
 
 module.exports = router;
 ```
-
-Lebih clean dan terorganisir!
 
 ---
 
@@ -491,20 +538,22 @@ Route yang lebih spesifik harus didefinisikan terlebih dahulu!
 ## Error Handling di Routes
 
 ```javascript
-// Synchronous error
+// Synchronous error - render error page
 app.get("/users/:id", (req, res) => {
   const user = findUserById(req.params.id);
   if (!user) {
-    return res.status(404).json({ error: "User not found" });
+    return res.status(404).render("errors/404", {
+      message: "User not found",
+    });
   }
-  res.json({ user });
+  res.render("users/show", { user });
 });
 
 // Asynchronous error
 app.get("/users", async (req, res, next) => {
   try {
     const users = await fetchUsers();
-    res.json({ users });
+    res.render("users/index", { users });
   } catch (error) {
     next(error); // Pass ke error handler
   }
@@ -519,11 +568,18 @@ app.get("/users", async (req, res, next) => {
 // Tangani route yang tidak ditemukan
 // Letakkan di akhir setelah semua routes
 app.use((req, res, next) => {
-  res.status(404).json({
-    error: "Route not found",
-    path: req.url,
+  res.status(404).render("errors/404", {
+    url: req.url,
   });
 });
+```
+
+**views/errors/404.ejs:**
+
+```html
+<h1>404 - Page Not Found</h1>
+<p>The page <%= url %> does not exist.</p>
+<a href="/">Go to Home</a>
 ```
 
 ---
@@ -538,38 +594,53 @@ app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
 
-  res.status(statusCode).json({
-    success: false,
+  res.status(statusCode).render("errors/500", {
     error: message,
-    ...(process.env.NODE_ENV === "development" && {
-      stack: err.stack,
-    }),
+    // Tampilkan stack trace hanya di development
+    stack: process.env.NODE_ENV === "development" ? err.stack : null,
   });
 });
 ```
 
+**views/errors/500.ejs:**
+
+```html
+<h1>500 - Internal Server Error</h1>
+<p><%= error %></p>
+<% if (stack) { %>
+<pre><%= stack %></pre>
+<% } %>
+```
+
 ---
 
-## RESTful API Routes
+## Complete CRUD Routes Example
 
 ```javascript
 // routes/products.js
 const router = require("express").Router();
+const ProductController = require("../controllers/productController");
 
-// GET /api/products - List all products
+// GET /products - Tampilkan daftar produk
 router.get("/", ProductController.index);
 
-// GET /api/products/:id - Get single product
-router.get("/:id", ProductController.show);
+// GET /products/new - Form tambah produk
+router.get("/new", ProductController.new);
 
-// POST /api/products - Create product
+// POST /products - Proses form tambah
 router.post("/", ProductController.create);
 
-// PUT /api/products/:id - Update product
-router.put("/:id", ProductController.update);
+// GET /products/:id - Detail produk
+router.get("/:id", ProductController.show);
 
-// DELETE /api/products/:id - Delete product
-router.delete("/:id", ProductController.delete);
+// GET /products/:id/edit - Form edit produk
+router.get("/:id/edit", ProductController.edit);
+
+// POST /products/:id - Proses form edit
+router.post("/:id", ProductController.update);
+
+// POST /products/:id/delete - Hapus produk
+router.post("/:id/delete", ProductController.delete);
 
 module.exports = router;
 ```
@@ -601,160 +672,233 @@ module.exports = router;
 ```javascript
 // routes/posts.js
 router.get("/", (req, res) => {
-  const userId = req.userId; // Dari parent router
-  res.json({ posts: [], userId });
+  const userId = req.userId;
+  const posts = getPostsByUserId(userId);
+  res.render("posts/index", { posts, userId });
 });
 ```
 
 ---
 
-## Route Versioning
+## Template Engine Integration
+
+Menggunakan EJS sebagai template engine:
 
 ```javascript
-// Versioning dengan prefix
-const v1Routes = require("./routes/v1");
-const v2Routes = require("./routes/v2");
+// app.js
+const express = require("express");
+const app = express();
 
-app.use("/api/v1", v1Routes);
-app.use("/api/v2", v2Routes);
+// Set EJS sebagai view engine
+app.set("view engine", "ejs");
+app.set("views", "./views");
+
+// Route
+app.get("/", (req, res) => {
+  res.render("index", {
+    title: "Welcome",
+    user: { name: "John" },
+  });
+});
 ```
 
-```javascript
-// routes/v1/users.js
-router.get("/", (req, res) => {
-  res.json({ version: 1, users: [] });
-});
+**views/index.ejs:**
 
-// routes/v2/users.js
-router.get("/", (req, res) => {
-  res.json({ version: 2, users: [], meta: {} });
-});
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+  </head>
+  <body>
+    <h1>Hello, <%= user.name %>!</h1>
+  </body>
+</html>
 ```
 
 ---
 
-## Route dengan Validation
+## Form Validation
 
 ```javascript
-const { body, param, validationResult } = require("express-validator");
+const { body, validationResult } = require("express-validator");
 
+// GET form
+router.get("/users/new", (req, res) => {
+  res.render("users/new", { errors: null });
+});
+
+// POST with validation
 router.post(
   "/users",
   // Validation rules
   body("email").isEmail().normalizeEmail(),
   body("name").trim().notEmpty(),
-  body("age").isInt({ min: 1, max: 120 }),
+  body("password").isLength({ min: 6 }),
 
   // Check validation
-  (req, res, next) => {
+  (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      // Render form lagi dengan error messages
+      return res.render("users/new", {
+        errors: errors.array(),
+        formData: req.body,
+      });
     }
-    next();
+    // Simpan user dan redirect
+    saveUser(req.body);
+    res.redirect("/users");
   },
-
-  // Handler
-  UserController.create,
 );
 ```
 
 ---
 
-## Rate Limiting
+## Flash Messages
+
+Menampilkan pesan sukses/error setelah redirect:
 
 ```javascript
-const rateLimit = require("express-rate-limit");
+const session = require("express-session");
+const flash = require("connect-flash");
 
-// Limit 100 requests per 15 minutes
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: "Too many requests from this IP",
+app.use(session({ secret: "secret-key" }));
+app.use(flash());
+
+// Middleware untuk pass flash messages ke views
+app.use((req, res, next) => {
+  res.locals.success = req.flash("success");
+  res.locals.error = req.flash("error");
+  next();
 });
 
-// Apply to all routes
-app.use("/api/", limiter);
-
-// Apply to specific routes
-app.post("/api/login", limiter, AuthController.login);
-```
-
----
-
-## CORS di Routes
-
-```javascript
-const cors = require("cors");
-
-// Enable CORS untuk semua routes
-app.use(cors());
-
-// Enable CORS untuk routes tertentu
-app.use("/api", cors(), apiRoutes);
-
-// Custom CORS options
-const corsOptions = {
-  origin: "https://example.com",
-  methods: ["GET", "POST"],
-  credentials: true,
-};
-
-app.use("/api", cors(corsOptions), apiRoutes);
-```
-
----
-
-## Route Documentation
-
-```javascript
-/**
- * @route   GET /api/users
- * @desc    Get all users
- * @access  Public
- */
-router.get("/", UserController.index);
-
-/**
- * @route   POST /api/users
- * @desc    Create new user
- * @access  Private (Admin only)
- */
-router.post("/", authenticate, isAdmin, UserController.create);
-
-/**
- * @route   PUT /api/users/:id
- * @desc    Update user by ID
- * @access  Private
- */
-router.put("/:id", authenticate, UserController.update);
-```
-
----
-
-## Testing Routes
-
-```javascript
-// tests/users.test.js
-const request = require("supertest");
-const app = require("../app");
-
-describe("User Routes", () => {
-  test("GET /api/users should return users", async () => {
-    const response = await request(app).get("/api/users").expect(200);
-
-    expect(response.body).toHaveProperty("users");
-  });
-
-  test("POST /api/users should create user", async () => {
-    const response = await request(app)
-      .post("/api/users")
-      .send({ name: "John", email: "john@example.com" })
-      .expect(201);
-
-    expect(response.body.message).toBe("User created");
-  });
+// Di controller
+router.post("/users", (req, res) => {
+  saveUser(req.body);
+  req.flash("success", "User created successfully!");
+  res.redirect("/users");
 });
+```
+
+**views/layout.ejs:**
+
+```html
+<% if (success.length > 0) { %>
+<div class="alert success"><%= success %></div>
+<% } %>
+```
+
+---
+
+## File Upload Handling
+
+```javascript
+const multer = require("multer");
+
+// Configure multer untuk menyimpan file
+const storage = multer.diskStorage({
+  destination: "./public/uploads/",
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const upload = multer({ storage });
+
+// Route untuk upload
+router.post("/upload", upload.single("avatar"), (req, res) => {
+  // req.file berisi info file yang diupload
+  const filePath = "/uploads/" + req.file.filename;
+  res.redirect("/profile");
+});
+```
+
+**HTML Form:**
+
+```html
+<form action="/upload" method="POST" enctype="multipart/form-data">
+  <input type="file" name="avatar" />
+  <button type="submit">Upload</button>
+</form>
+```
+
+---
+
+## Session Management
+
+```javascript
+const session = require("express-session");
+
+app.use(
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 3600000 }, // 1 hour
+  }),
+);
+
+// Login route
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  const user = authenticateUser(email, password);
+
+  if (user) {
+    req.session.userId = user.id;
+    req.session.user = user;
+    res.redirect("/dashboard");
+  } else {
+    res.render("login", { error: "Invalid credentials" });
+  }
+});
+
+// Logout route
+app.post("/logout", (req, res) => {
+  req.session.destroy();
+  res.redirect("/login");
+});
+```
+
+---
+
+## Layout dan Partials
+
+**views/layout.ejs:**
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
+  <body>
+    <%- include('partials/header') %>
+    <main><%- body %></main>
+    <%- include('partials/footer') %>
+  </body>
+</html>
+```
+
+**views/partials/header.ejs:**
+
+```html
+<header>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/products">Products</a>
+    <a href="/about">About</a>
+  </nav>
+</header>
+```
+
+**views/partials/footer.ejs:**
+
+```html
+<footer>
+  <p>&copy; 2026 My Website</p>
+</footer>
 ```
 
 ---
@@ -762,13 +906,13 @@ describe("User Routes", () => {
 ## Best Practices
 
 1. **Gunakan Express Router** untuk modularitas
-2. **RESTful naming** - gunakan kata benda, bukan kata kerja
-3. **Versioning API** - untuk backward compatibility
-4. **Consistent response format** - JSON dengan struktur sama
-5. **Error handling** - gunakan try-catch dan error middleware
-6. **Validation** - validasi semua input
-7. **Documentation** - dokumentasikan setiap route
-8. **Security** - gunakan auth, rate limiting, CORS
+2. **Post-Redirect-Get pattern** - hindari duplicate submission
+3. **Validation** - validasi semua form input
+4. **Error handling** - render error pages yang informatif
+5. **Session management** - untuk authentication
+6. **Flash messages** - untuk feedback ke user
+7. **Consistent naming** - gunakan kata benda untuk resources
+8. **Security** - sanitize input, gunakan CSRF protection
 
 ---
 
@@ -777,11 +921,13 @@ describe("User Routes", () => {
 ✅ **GOOD:**
 
 ```
-GET    /users           - Get all users
-GET    /users/:id       - Get user by ID
-POST   /users           - Create user
-PUT    /users/:id       - Update user
-DELETE /users/:id       - Delete user
+GET    /users           - Halaman daftar users
+GET    /users/new       - Form tambah user
+GET    /users/:id       - Halaman detail user
+POST   /users           - Proses form tambah
+GET    /users/:id/edit  - Form edit user
+POST   /users/:id       - Proses form edit
+POST   /users/:id/delete - Hapus user
 ```
 
 ❌ **BAD:**
@@ -790,52 +936,56 @@ DELETE /users/:id       - Delete user
 GET    /getUsers
 POST   /createUser
 GET    /user-detail/:id
-DELETE /deleteUser/:id
+GET    /deleteUser/:id
 ```
 
 ---
 
-## Response Format Guidelines
+## Pagination untuk Web App
 
 ```javascript
-// Success response
-res.json({
-  success: true,
-  data: {},
-  message: "Operation successful",
-});
+app.get("/products", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const offset = (page - 1) * limit;
 
-// Error response
-res.status(400).json({
-  success: false,
-  error: "Error message",
-  errors: [], // Detail errors (optional)
-});
+  const products = await getProducts(limit, offset);
+  const totalProducts = await getTotalProducts();
+  const totalPages = Math.ceil(totalProducts / limit);
 
-// List response with pagination
-res.json({
-  success: true,
-  data: [],
-  meta: {
-    page: 1,
-    limit: 10,
-    total: 100,
-  },
+  res.render("products/index", {
+    products,
+    currentPage: page,
+    totalPages,
+    hasNextPage: page < totalPages,
+    hasPrevPage: page > 1,
+  });
 });
+```
+
+**View pagination:**
+
+```html
+<% if (hasPrevPage) { %>
+<a href="?page=<%= currentPage - 1 %>">Previous</a>
+<% } %> <%= currentPage %> of <%= totalPages %> <% if (hasNextPage) { %>
+<a href="?page=<%= currentPage + 1 %>">Next</a>
+<% } %>
 ```
 
 ---
 
 ## Kesalahan Umum
 
-❌ Tidak menangani error
+❌ Tidak menangani error dengan error pages
 ❌ Route terlalu spesifik di awal
 ❌ Tidak menggunakan Router untuk modularitas
-❌ Tidak konsisten dalam naming
+❌ Tidak menggunakan Post-Redirect-Get pattern
 ❌ Lupa middleware `next()`
-❌ Tidak validasi input
-❌ Expose sensitive data di response
-❌ Tidak menggunakan HTTP status code yang tepat
+❌ Tidak validasi form input
+❌ Tidak menggunakan flash messages untuk feedback
+❌ Lupa setup static files
+❌ Tidak sanitize user input
 
 ---
 
@@ -864,9 +1014,10 @@ res.json({
 
 - [Express Routing Guide](https://expressjs.com/en/guide/routing.html)
 - [Express Router API](https://expressjs.com/en/4x/api.html#router)
-- [RESTful API Design](https://restfulapi.net/)
-- [HTTP Status Codes](https://httpstatuses.com/)
+- [EJS Template Engine](https://ejs.co/)
+- [express-session](https://github.com/expressjs/session)
 - [express-validator](https://express-validator.github.io/)
+- [Multer (File Upload)](https://github.com/expressjs/multer)
 
 ---
 

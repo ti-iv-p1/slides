@@ -974,9 +974,7 @@ app.get("/products", async (req, res) => {
 ```html
 {{#if hasPrevPage}}
 <a href="?page={{prevPage}}">Previous</a>
-{{/if}}
-{{currentPage}} of {{totalPages}}
-{{#if hasNextPage}}
+{{/if}} {{currentPage}} of {{totalPages}} {{#if hasNextPage}}
 <a href="?page={{nextPage}}">Next</a>
 {{/if}}
 ```

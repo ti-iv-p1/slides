@@ -286,17 +286,17 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 const logger = winston.createLogger({
   level: isDevelopment ? "debug" : "info",
   format: isDevelopment
-    ? winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple(),
-      )
+    ? winston.format.combine(winston.format.colorize(), winston.format.simple())
     : winston.format.json(),
   transports: [
     new winston.transports.Console(),
     // Production: simpan ke file
     ...(!isDevelopment
       ? [
-          new winston.transports.File({ filename: "logs/error.log", level: "error" }),
+          new winston.transports.File({
+            filename: "logs/error.log",
+            level: "error",
+          }),
           new winston.transports.File({ filename: "logs/combined.log" }),
         ]
       : []),
@@ -399,9 +399,7 @@ const winston = require("winston");
 
 // Create Winston logger
 const logger = winston.createLogger({
-  transports: [
-    new winston.transports.File({ filename: "logs/access.log" }),
-  ],
+  transports: [new winston.transports.File({ filename: "logs/access.log" })],
 });
 
 // Create Morgan stream to Winston
@@ -523,7 +521,10 @@ app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
 
   res.status(statusCode).render("errors/500", {
-    error: process.env.NODE_ENV === "development" ? err.message : "Internal Server Error",
+    error:
+      process.env.NODE_ENV === "development"
+        ? err.message
+        : "Internal Server Error",
   });
 });
 ```
@@ -663,7 +664,7 @@ logger.info("User login", {
 5. **Different configs for dev/prod**
 
    ```javascript
-   const level = process.env.NODE_ENV === 'production' ? 'info' : 'debug';
+   const level = process.env.NODE_ENV === "production" ? "info" : "debug";
    ```
 
 6. **Log errors with stack traces**
@@ -976,12 +977,12 @@ logs/
 
 ```javascript
 // .env.development
-NODE_ENV=development
-LOG_LEVEL=debug
+NODE_ENV = development;
+LOG_LEVEL = debug;
 
 // .env.production
-NODE_ENV=production
-LOG_LEVEL=info
+NODE_ENV = production;
+LOG_LEVEL = info;
 ```
 
 ```javascript

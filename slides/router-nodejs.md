@@ -59,10 +59,12 @@ app.METHOD(PATH, HANDLER);
 
 ```javascript
 const express = require("express");
+const { engine } = require("express-handlebars");
 const app = express();
 
 // Set view engine
-app.set("view engine", "ejs");
+app.engine("handlebars", engine());
+app.set("view engine", "handlebars");
 
 // GET request - render home page
 app.get("/", (req, res) => {
@@ -285,7 +287,9 @@ const express = require("express");
 const app = express();
 
 // Set view engine
-app.set("view engine", "ejs");
+const { engine } = require("express-handlebars");
+app.engine("handlebars", engine());
+app.set("view engine", "handlebars");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 
@@ -574,11 +578,11 @@ app.use((req, res, next) => {
 });
 ```
 
-**views/errors/404.ejs:**
+**views/errors/404.handlebars:**
 
 ```html
 <h1>404 - Page Not Found</h1>
-<p>The page <%= url %> does not exist.</p>
+<p>The page {{url}} does not exist.</p>
 <a href="/">Go to Home</a>
 ```
 
@@ -602,14 +606,14 @@ app.use((err, req, res, next) => {
 });
 ```
 
-**views/errors/500.ejs:**
+**views/errors/500.handlebars:**
 
 ```html
 <h1>500 - Internal Server Error</h1>
-<p><%= error %></p>
-<% if (stack) { %>
-<pre><%= stack %></pre>
-<% } %>
+<p>{{error}}</p>
+{{#if stack}}
+<pre>{{stack}}</pre>
+{{/if}}
 ```
 
 ---
@@ -682,15 +686,17 @@ router.get("/", (req, res) => {
 
 ## Template Engine Integration
 
-Menggunakan EJS sebagai template engine:
+Menggunakan Handlebars sebagai template engine:
 
 ```javascript
 // app.js
 const express = require("express");
+const { engine } = require("express-handlebars");
 const app = express();
 
-// Set EJS sebagai view engine
-app.set("view engine", "ejs");
+// Set Handlebars sebagai view engine
+app.engine("handlebars", engine());
+app.set("view engine", "handlebars");
 app.set("views", "./views");
 
 // Route
@@ -702,16 +708,16 @@ app.get("/", (req, res) => {
 });
 ```
 
-**views/index.ejs:**
+**views/index.handlebars:**
 
 ```html
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %></title>
+    <title>{{title}}</title>
   </head>
   <body>
-    <h1>Hello, <%= user.name %>!</h1>
+    <h1>Hello, {{user.name}}!</h1>
   </body>
 </html>
 ```
@@ -781,12 +787,12 @@ router.post("/users", (req, res) => {
 });
 ```
 
-**views/layout.ejs:**
+**views/layout.handlebars:**
 
 ```html
-<% if (success.length > 0) { %>
-<div class="alert success"><%= success %></div>
-<% } %>
+{{#if success}}
+<div class="alert success">{{success}}</div>
+{{/if}}
 ```
 
 ---
@@ -864,24 +870,24 @@ app.post("/logout", (req, res) => {
 
 ## Layout dan Partials
 
-**views/layout.ejs:**
+**views/layouts/main.handlebars:**
 
 ```html
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= title %></title>
+    <title>{{title}}</title>
     <link rel="stylesheet" href="/css/style.css" />
   </head>
   <body>
-    <%- include('partials/header') %>
-    <main><%- body %></main>
-    <%- include('partials/footer') %>
+    {{> header}}
+    <main>{{{body}}}</main>
+    {{> footer}}
   </body>
 </html>
 ```
 
-**views/partials/header.ejs:**
+**views/partials/header.handlebars:**
 
 ```html
 <header>
@@ -893,7 +899,7 @@ app.post("/logout", (req, res) => {
 </header>
 ```
 
-**views/partials/footer.ejs:**
+**views/partials/footer.handlebars:**
 
 ```html
 <footer>
@@ -966,11 +972,13 @@ app.get("/products", async (req, res) => {
 **View pagination:**
 
 ```html
-<% if (hasPrevPage) { %>
-<a href="?page=<%= currentPage - 1 %>">Previous</a>
-<% } %> <%= currentPage %> of <%= totalPages %> <% if (hasNextPage) { %>
-<a href="?page=<%= currentPage + 1 %>">Next</a>
-<% } %>
+{{#if hasPrevPage}}
+<a href="?page={{prevPage}}">Previous</a>
+{{/if}}
+{{currentPage}} of {{totalPages}}
+{{#if hasNextPage}}
+<a href="?page={{nextPage}}">Next</a>
+{{/if}}
 ```
 
 ---
@@ -1014,7 +1022,8 @@ app.get("/products", async (req, res) => {
 
 - [Express Routing Guide](https://expressjs.com/en/guide/routing.html)
 - [Express Router API](https://expressjs.com/en/4x/api.html#router)
-- [EJS Template Engine](https://ejs.co/)
+- [Handlebars Template Engine](https://handlebarsjs.com/)
+- [express-handlebars](https://github.com/express-handlebars/express-handlebars)
 - [express-session](https://github.com/expressjs/session)
 - [express-validator](https://express-validator.github.io/)
 - [Multer (File Upload)](https://github.com/expressjs/multer)

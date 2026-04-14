@@ -786,13 +786,15 @@ module.exports = logger;
 ```javascript
 // app.js
 const express = require("express");
+const { engine } = require("express-handlebars");
 const morgan = require("morgan");
 const logger = require("./config/logger");
 
 const app = express();
 
 // Setup view engine
-app.set("view engine", "ejs");
+app.engine("handlebars", engine());
+app.set("view engine", "handlebars");
 app.use(express.static("public"));
 app.use(express.urlencoded({ extended: true }));
 

@@ -93,7 +93,7 @@ Membangun Aplikasi Web Full-Stack dengan Template Engine dan Database
 
 - Alat untuk menghasilkan HTML dinamis
 - Memisahkan logic dan view
-- Contoh: Handlebars, EJS, Pug
+- Contoh: Handlebars, Pug, Nunjucks
 
 ---
 

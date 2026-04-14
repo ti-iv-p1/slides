@@ -106,6 +106,33 @@
 - Menguasai teknik error handling yang efektif
 - Menerapkan best practices dalam penanganan error
 
+---
+
+### Logging di Node.js
+
+**Link:** https://ti-iv-p1.github.io/slides/logging-nodejs
+
+**Tujuan Pembelajaran:**
+
+- Memahami pentingnya logging dalam aplikasi
+- Menguasai console logging dasar
+- Memahami log levels (info, warn, error, debug)
+- Menggunakan Winston untuk advanced logging
+- Menggunakan Morgan untuk HTTP request logging
+- Menerapkan best practices logging
+- Membedakan logging untuk development vs production
+
+**Key Takeaways:**
+
+- Logging = mencatat aktivitas aplikasi untuk debugging, monitoring, dan troubleshooting
+- Console methods: log, error, warn, debug, table, time, trace, group
+- Winston: professional logging library dengan multiple transports dan log rotation
+- Morgan: middleware untuk HTTP request logging
+- Best practices: appropriate log levels, structured logging, jangan log sensitive data, gunakan log rotation
+- Production: simpan logs ke file dengan rotation, development: console output dengan colors
+
+---
+
 ### MVC Pattern di Node.js
 
 **Link:** https://ti-iv-p1.github.io/slides/mvc-nodejs
@@ -156,6 +183,36 @@
 - Memahami Access Control List (ACL)
 - Menerapkan Resource-Based Authorization
 - Menggunakan middleware untuk authorization
+
+---
+
+### Security di Node.js dan Express.js
+
+**Link:** https://ti-iv-p1.github.io/slides/security-nodejs
+
+**Tujuan Pembelajaran:**
+
+- Memahami konsep dasar web security
+- Menguasai authentication dan password hashing
+- Mencegah common vulnerabilities (XSS, CSRF, SQL Injection)
+- Mengamankan session dan cookies
+- Menggunakan Helmet.js untuk security headers
+- Menerapkan input validation dan sanitization
+- Mengimplementasikan rate limiting
+- Menerapkan best practices security
+
+**Key Takeaways:**
+
+- OWASP Top 10: Injection, XSS, CSRF, Broken Authentication, Security Misconfiguration
+- Password hashing dengan bcrypt (JANGAN plaintext!)
+- Secure sessions: httpOnly, secure, sameSite cookies
+- Input validation dengan express-validator
+- Prevent SQL Injection: gunakan parameterized queries / ORM
+- Prevent XSS: escape HTML output, gunakan template engine, CSP headers
+- Prevent CSRF: gunakan CSRF tokens untuk forms
+- Helmet.js: set security headers otomatis
+- Rate limiting: mencegah brute force attacks
+- HTTPS di production, environment variables untuk secrets
 
 ---
 

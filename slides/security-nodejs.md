@@ -362,7 +362,7 @@ app.get("/search", (req, res) => {
 ✅ **SAFE: Gunakan Template Engine**
 
 ```javascript
-// EJS otomatis escape HTML dengan <%= %>
+// Handlebars otomatis escape HTML dengan {{ }}
 app.get("/search", (req, res) => {
   const query = req.query.q;
   res.render("search", { query });
@@ -370,11 +370,11 @@ app.get("/search", (req, res) => {
 ```
 
 ```html
-<!-- views/search.ejs - SAFE, auto-escaped -->
-<h1>Results for: <%= query %></h1>
+<!-- views/search.handlebars - SAFE, auto-escaped -->
+<h1>Results for: {{query}}</h1>
 
 <!-- UNSAFE - raw HTML (hindari!) -->
-<h1>Results for: <%- query %></h1>
+<h1>Results for: {{{query}}}</h1>
 ```
 
 ---
@@ -435,7 +435,7 @@ app.use((req, res, next) => {
 
 ```html
 <form method="POST" action="/users">
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+  <input type="hidden" name="_csrf" value="{{csrfToken}}" />
   <input type="text" name="name" />
   <button type="submit">Submit</button>
 </form>
@@ -890,7 +890,7 @@ app.post("/logout", (req, res) => {
 
 ```html
 <form method="POST" action="/logout">
-  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+  <input type="hidden" name="_csrf" value="{{csrfToken}}" />
   <button type="submit">Logout</button>
 </form>
 ```
@@ -1003,7 +1003,9 @@ app.use((req, res, next) => {
 });
 
 // View engine
-app.set("view engine", "ejs");
+const { engine } = require("express-handlebars");
+app.engine("handlebars", engine());
+app.set("view engine", "handlebars");
 
 // Routes
 app.use("/", require("./routes"));

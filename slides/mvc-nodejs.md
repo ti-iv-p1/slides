@@ -115,16 +115,16 @@ module.exports = User;
 
 - Menampilkan data ke user
 - User interface / presentation layer
-- Template rendering (EJS, Pug, Handlebars)
+- Template rendering (Handlebars, Pug)
 
 **View tidak boleh** mengandung logika bisnis
 
 ---
 
-## Contoh View - EJS Template
+## Contoh View - Handlebars Template
 
 ```html
-<!-- views/users/index.ejs -->
+<!-- views/users/index.handlebars -->
 <!DOCTYPE html>
 <html>
   <head>
@@ -141,13 +141,13 @@ module.exports = User;
         </tr>
       </thead>
       <tbody>
-        <% users.forEach(user => { %>
+        {{#each users}}
         <tr>
-          <td><%= user.id %></td>
-          <td><%= user.name %></td>
-          <td><%= user.email %></td>
+          <td>{{this.id}}</td>
+          <td>{{this.name}}</td>
+          <td>{{this.email}}</td>
         </tr>
-        <% }); %>
+        {{/each}}
       </tbody>
     </table>
   </body>
@@ -271,10 +271,10 @@ project/
 │   └── Product.js
 ├── views/
 │   ├── users/
-│   │   ├── index.ejs
-│   │   └── show.ejs
+│   │   ├── index.handlebars
+│   │   └── show.handlebars
 │   └── layouts/
-│       └── main.ejs
+│       └── main.handlebars
 ├── controllers/
 │   ├── userController.js
 │   └── productController.js
@@ -294,6 +294,7 @@ project/
 ```javascript
 // app.js
 const express = require("express");
+const { engine } = require("express-handlebars");
 const app = express();
 
 // Middleware
@@ -302,7 +303,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 // View engine setup
-app.set("view engine", "ejs");
+app.engine("handlebars", engine());
+app.set("view engine", "handlebars");
 app.set("views", "./views");
 
 // Routes

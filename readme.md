@@ -60,13 +60,6 @@
 - Mampu mendesain database dengan normalisasi yang tepat
 - Menerapkan foreign key constraint dan indexing
 
-**Key Takeaways:**
-
-- Normalisasi = proses mengorganisir data untuk mengurangi redundansi
-- Bentuk Normal: 1NF (atomik) → 2NF (no partial dependency) → 3NF (no transitive dependency) → BCNF
-- Jenis Relasi: One-to-One (1:1), One-to-Many (1:N), Many-to-Many (M:N dengan junction table)
-- Selalu gunakan foreign key constraint dan index pada kolom yang sering diquery
-
 ---
 
 ## Pertemuan 4
@@ -85,14 +78,6 @@
 - Menggunakan tools DBML (dbdiagram.io, CLI)
 - Menerapkan DBML untuk dokumentasi dan prototyping database
 
-**Key Takeaways:**
-
-- DBML = bahasa markup untuk mendefinisikan struktur database dengan syntax simple
-- Keuntungan: readable, database agnostic, auto-generate ERD, version control ready
-- Syntax: `Table name { columns }`, `Ref: table1.col > table2.col`, `Enum`, `TableGroup`
-- Tools: dbdiagram.io (online), DBML CLI (`dbml2sql`, `sql2dbml`), VS Code extensions
-- Use cases: prototyping, dokumentasi, collaboration, learning
-
 ---
 
 ### Error Handling di Node.js
@@ -105,6 +90,23 @@
 - Mengenal berbagai jenis error
 - Menguasai teknik error handling yang efektif
 - Menerapkan best practices dalam penanganan error
+
+---
+
+### Debugging di Node.js
+
+**Link:** https://ti-iv-p1.github.io/slides/debugging-nodejs
+
+**Tujuan Pembelajaran:**
+
+- Memahami konsep debugging dan pentingnya
+- Menguasai teknik debugging di Node.js
+- Menggunakan console methods secara efektif
+- Debugging dengan VS Code debugger
+- Debugging dengan Chrome DevTools
+- Menggunakan Node.js built-in debugger
+- Menerapkan debugging best practices
+- Troubleshooting common issues
 
 ---
 
@@ -121,15 +123,6 @@
 - Menggunakan Morgan untuk HTTP request logging
 - Menerapkan best practices logging
 - Membedakan logging untuk development vs production
-
-**Key Takeaways:**
-
-- Logging = mencatat aktivitas aplikasi untuk debugging, monitoring, dan troubleshooting
-- Console methods: log, error, warn, debug, table, time, trace, group
-- Winston: professional logging library dengan multiple transports dan log rotation
-- Morgan: middleware untuk HTTP request logging
-- Best practices: appropriate log levels, structured logging, jangan log sensitive data, gunakan log rotation
-- Production: simpan logs ke file dengan rotation, development: console output dengan colors
 
 ---
 
@@ -201,18 +194,21 @@
 - Mengimplementasikan rate limiting
 - Menerapkan best practices security
 
-**Key Takeaways:**
+---
 
-- OWASP Top 10: Injection, XSS, CSRF, Broken Authentication, Security Misconfiguration
-- Password hashing dengan bcrypt (JANGAN plaintext!)
-- Secure sessions: httpOnly, secure, sameSite cookies
-- Input validation dengan express-validator
-- Prevent SQL Injection: gunakan parameterized queries / ORM
-- Prevent XSS: escape HTML output, gunakan template engine, CSP headers
-- Prevent CSRF: gunakan CSRF tokens untuk forms
-- Helmet.js: set security headers otomatis
-- Rate limiting: mencegah brute force attacks
-- HTTPS di production, environment variables untuk secrets
+### Validation di Node.js dan Express.js
+
+**Link:** https://ti-iv-p1.github.io/slides/validation-nodejs
+
+**Tujuan Pembelajaran:**
+
+- Memahami pentingnya validasi input data
+- Menguasai teknik validasi di Node.js
+- Menggunakan library validasi (express-validator, Joi, Zod)
+- Menerapkan validasi untuk form, API, dan database
+- Membuat custom validator
+- Menangani validation errors dengan baik
+- Menerapkan best practices validation
 
 ---
 

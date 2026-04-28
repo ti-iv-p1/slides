@@ -19,8 +19,8 @@ _paginate: skip
 ## Tujuan Pembelajaran
 
 - Memahami pentingnya validasi input data
-- Menguasai teknik validasi di Node.js
-- Menggunakan library validasi (express-validator, Joi, Zod)
+- Menguasai teknik validasi dengan vanilla JavaScript
+- Menggunakan library Express Validator
 - Menerapkan validasi untuk form, API, dan database
 - Membuat custom validator
 - Menangani validation errors dengan baik
@@ -75,38 +75,249 @@ _paginate: skip
 
 ---
 
-## Validasi Tanpa Library
+## Validasi dengan Vanilla JavaScript
+
+### Contoh 1: Validasi Required (Wajib Diisi)
 
 ```javascript
 app.post("/register", (req, res) => {
-  const { username, email, password } = req.body;
+  const { username } = req.body;
   const errors = [];
 
-  // Check required fields
   if (!username || username.trim() === "") {
-    errors.push("Username is required");
-  }
-
-  // Check email format
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!email || !emailRegex.test(email)) {
-    errors.push("Valid email is required");
-  }
-
-  // Check password length
-  if (!password || password.length < 8) {
-    errors.push("Password must be at least 8 characters");
+    errors.push({ field: "username", message: "Username is required" });
   }
 
   if (errors.length > 0) {
     return res.status(400).json({ errors });
   }
-
-  // Process valid data...
+  res.json({ success: true });
 });
 ```
 
-❌ **Masalah**: Verbose, repetitive, error-prone
+---
+
+## Vanilla JavaScript: Validasi Email
+
+```javascript
+app.post("/subscribe", (req, res) => {
+  const { email } = req.body;
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  if (!email || !emailRegex.test(email)) {
+    return res.status(400).json({
+      error: "Valid email is required",
+    });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi Length (Min/Max)
+
+```javascript
+app.post("/create-username", (req, res) => {
+  const { username } = req.body;
+
+  if (!username || username.length < 3 || username.length > 20) {
+    return res.status(400).json({
+      error: "Username must be 3-20 characters",
+    });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi Number (Integer & Range)
+
+```javascript
+app.post("/update-age", (req, res) => {
+  const age = Number(req.body.age);
+
+  if (!Number.isInteger(age) || age < 18 || age > 100) {
+    return res.status(400).json({
+      error: "Age must be an integer between 18-100",
+    });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi URL
+
+```javascript
+app.post("/add-website", (req, res) => {
+  const { website } = req.body;
+  const urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6}).*$/;
+
+  if (!website || !urlRegex.test(website)) {
+    return res.status(400).json({ error: "Valid URL is required" });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi Phone Number
+
+```javascript
+app.post("/add-phone", (req, res) => {
+  const { phone } = req.body;
+  const phoneRegex = /^(\+62|62|0)[0-9]{9,12}$/;
+  const cleanPhone = phone?.replace(/[\s-]/g, "");
+
+  if (!cleanPhone || !phoneRegex.test(cleanPhone)) {
+    return res.status(400).json({ error: "Invalid phone number" });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi Password (Strong)
+
+```javascript
+app.post("/change-password", (req, res) => {
+  const { password } = req.body;
+  const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
+  if (!password || !strongRegex.test(password)) {
+    return res.status(400).json({
+      error:
+        "Password must be 8+ chars with uppercase, lowercase, number, special char",
+    });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi Date
+
+```javascript
+app.post("/book-appointment", (req, res) => {
+  const date = new Date(req.body.appointmentDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (isNaN(date.getTime()) || date < today) {
+    return res.status(400).json({ error: "Invalid or past date" });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi Boolean
+
+```javascript
+app.post("/accept-terms", (req, res) => {
+  const { termsAccepted } = req.body;
+
+  if (termsAccepted !== true && termsAccepted !== "true") {
+    return res.status(400).json({ error: "Must accept terms" });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi Array
+
+```javascript
+app.post("/add-tags", (req, res) => {
+  const { tags } = req.body;
+  const isValid =
+    Array.isArray(tags) &&
+    tags.length >= 1 &&
+    tags.length <= 5 &&
+    tags.every((tag) => typeof tag === "string");
+
+  if (!isValid) {
+    return res.status(400).json({ error: "Tags must be 1-5 strings" });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi Alphanumeric
+
+```javascript
+app.post("/create-code", (req, res) => {
+  const { code } = req.body;
+  const alphanumericRegex = /^[a-zA-Z0-9]+$/;
+
+  if (!code || !alphanumericRegex.test(code)) {
+    return res.status(400).json({ error: "Code must be alphanumeric" });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi Credit Card
+
+```javascript
+app.post("/add-card", (req, res) => {
+  const cleanNumber = req.body.cardNumber?.replace(/[\s-]/g, "");
+  const isValid = /^\d{13,19}$/.test(cleanNumber);
+
+  if (!isValid) {
+    return res.status(400).json({ error: "Invalid card number" });
+  }
+
+  res.json({ success: true });
+});
+```
+
+---
+
+## Vanilla JavaScript: Validasi Lengkap (Kombinasi)
+
+```javascript
+app.post("/register", (req, res) => {
+  const { username, email, password } = req.body;
+
+  // Validasi kombinasi dengan regex
+  const isValidUsername = username && /^[a-zA-Z0-9_]{3,20}$/.test(username);
+  const isValidEmail =
+    email && /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+  const isValidPassword =
+    password && /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(password);
+
+  if (!isValidUsername || !isValidEmail || !isValidPassword) {
+    return res.status(400).json({ error: "Invalid input" });
+  }
+
+  res.json({ success: true });
+});
+```
+
+**Masalah dengan Vanilla JS**: Verbose, repetitive, error-prone
 
 ---
 
@@ -114,21 +325,33 @@ app.post("/register", (req, res) => {
 
 **Library validasi paling populer untuk Express.js**
 
+**Mengapa menggunakan Express-Validator?**
+
+- ✅ Built-in validators untuk banyak kasus (email, URL, phone, dll)
+- ✅ Chainable API - mudah dibaca dan ditulis
+- ✅ Custom validators untuk logika bisnis
+- ✅ Sanitization built-in
+- ✅ Integration sempurna dengan Express
+- ✅ Async validation support
+- ✅ Production-ready dan battle-tested
+
+---
+
+## Express-Validator: Instalasi
+
 ```bash
 npm install express-validator
 ```
 
-**Features:**
+**Import yang diperlukan:**
 
-- Built-in validators untuk kasus umum
-- Chain multiple validators
-- Custom validators
-- Sanitization
-- Integration dengan Express
+```javascript
+const { body, validationResult } = require("express-validator");
+```
 
 ---
 
-## Express-Validator: Basic Usage
+## Express-Validator: Validasi Required
 
 ```javascript
 const { body, validationResult } = require("express-validator");
@@ -136,71 +359,659 @@ const { body, validationResult } = require("express-validator");
 app.post(
   "/register",
   [
-    // Validate username
-    body("username")
-      .trim()
-      .notEmpty()
-      .withMessage("Username is required")
-      .isLength({ min: 3, max: 20 })
-      .withMessage("Username must be 3-20 characters"),
-
-    // Validate email
-    body("email")
-      .trim()
-      .notEmpty()
-      .withMessage("Email is required")
-      .isEmail()
-      .withMessage("Must be a valid email")
-      .normalizeEmail(),
-
-    // Validate password
-    body("password")
-      .notEmpty()
-      .withMessage("Password is required")
-      .isLength({ min: 8 })
-      .withMessage("Password must be at least 8 characters")
-      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-      .withMessage("Password must contain uppercase, lowercase, and number"),
+    body("username").notEmpty().withMessage("Username is required"),
+    body("email").notEmpty().withMessage("Email is required"),
+    body("password").notEmpty().withMessage("Password is required"),
   ],
   (req, res) => {
     const errors = validationResult(req);
-    if (!errors.isEmpty()) {
+    if (!errors.isEmpty())
       return res.status(400).json({ errors: errors.array() });
-    }
+    res.json({ success: true });
+  },
+);
+```
 
-    // Process valid data...
-    res.json({ message: "Registration successful" });
+**Metode lain:** `.notEmpty()`, `.exists()`, `.not().isEmpty()`
+
+---
+
+## Express-Validator: Validasi Email
+
+```javascript
+app.post(
+  "/subscribe",
+  [
+    body("email")
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Invalid email format")
+      .normalizeEmail(),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+**Fitur tambahan:**
+
+- `.normalizeEmail()` - normalisasi format email (lowercase, remove dots di Gmail)
+- `.isEmail({ allow_display_name: false })` - konfigurasi tambahan
+
+---
+
+## Express-Validator: Validasi Length (Min/Max)
+
+```javascript
+app.post(
+  "/create-post",
+  [
+    body("title").isLength({ min: 5 }).withMessage("Title min 5 chars"),
+    body("description")
+      .isLength({ max: 500 })
+      .withMessage("Description max 500 chars"),
+    body("username")
+      .isLength({ min: 3, max: 20 })
+      .withMessage("Username 3-20 chars"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
   },
 );
 ```
 
 ---
 
-## Express-Validator: Built-in Validators
+## Express-Validator: Validasi Number (Integer & Range)
 
 ```javascript
-// String validators
-body("name").isString().isLength({ min: 2, max: 50 });
-body("email").isEmail();
-body("url").isURL();
-body("phone").isMobilePhone("id-ID");
+app.post(
+  "/update-profile",
+  [
+    body("age").isInt({ min: 18, max: 100 }).withMessage("Age must be 18-100"),
+    body("price").isFloat({ min: 0 }).withMessage("Price must be positive"),
+    body("rating")
+      .isFloat({ min: 1.0, max: 5.0 })
+      .withMessage("Rating 1.0-5.0"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
 
-// Number validators
-body("age").isInt({ min: 18, max: 100 });
-body("price").isFloat({ min: 0 });
+---
 
-// Date validators
-body("birthdate").isDate().isBefore(new Date().toISOString());
+## Express-Validator: Validasi URL
 
-// Boolean validators
-body("terms").isBoolean().equals("true");
+```javascript
+app.post(
+  "/add-website",
+  [
+    body("website")
+      .notEmpty()
+      .withMessage("URL is required")
+      .isURL()
+      .withMessage("Invalid URL format"),
+    body("profileUrl")
+      .isURL({ protocols: ["http", "https"], require_protocol: true })
+      .withMessage("URL must have http/https"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
 
-// Array validators
-body("tags").isArray({ min: 1, max: 5 });
-body("tags.*").isString(); // Validate each element
+---
 
-// Custom regex
-body("username").matches(/^[a-zA-Z0-9_]+$/);
+## Express-Validator: Validasi Phone Number
+
+```javascript
+app.post(
+  "/add-phone",
+  [
+    body("phone")
+      .isMobilePhone("id-ID")
+      .withMessage("Invalid Indonesian phone"),
+    body("internationalPhone")
+      .optional()
+      .isMobilePhone("any")
+      .withMessage("Invalid phone format"),
+    body("customPhone")
+      .matches(/^(\+62|62|0)[0-9]{9,12}$/)
+      .withMessage("Invalid format"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+**Locale yang didukung:**
+
+- `id-ID` - Indonesia
+- `en-US` - USA
+- `en-GB` - UK
+- `any` - Semua format
+
+---
+
+## Express-Validator: Validasi Password (Strong)
+
+```javascript
+app.post(
+  "/change-password",
+  [
+    body("password")
+      .isStrongPassword({
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+        minSymbols: 1,
+      })
+      .withMessage(
+        "Password must be strong (8+ chars, upper, lower, number, symbol)",
+      ),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+---
+
+## Express-Validator: Validasi Date
+
+```javascript
+app.post(
+  "/book-appointment",
+  [
+    body("appointmentDate").isDate().withMessage("Invalid date format"),
+    body("futureDate")
+      .isDate()
+      .custom((value) => {
+        if (new Date(value) <= new Date())
+          throw new Error("Must be future date");
+        return true;
+      }),
+    body("birthdate")
+      .isDate()
+      .isBefore(new Date().toISOString())
+      .withMessage("Must be past date"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+---
+
+## Express-Validator: Validasi Boolean
+
+```javascript
+app.post(
+  "/accept-terms",
+  [
+    body("termsAccepted").isBoolean().withMessage("Must be boolean"),
+    body("agreedToTerms").equals("true").withMessage("Must accept terms"),
+    body("newsletter").optional().isBoolean().toBoolean(),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+---
+
+## Express-Validator: Validasi Array
+
+```javascript
+app.post(
+  "/add-tags",
+  [
+    body("tags")
+      .isArray({ min: 1, max: 5 })
+      .withMessage("Tags must be 1-5 items"),
+    body("tags.*")
+      .isString()
+      .trim()
+      .notEmpty()
+      .withMessage("Tags must be non-empty strings"),
+    body("recipients").isArray().withMessage("Recipients must be array"),
+    body("recipients.*")
+      .isEmail()
+      .withMessage("Each recipient must be valid email"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+---
+
+## Express-Validator: Validasi Alphanumeric
+
+```javascript
+app.post(
+  "/create-code",
+  [
+    body("code")
+      .notEmpty()
+      .isAlphanumeric()
+      .withMessage("Code must be alphanumeric"),
+    body("name").isAlpha().withMessage("Name must contain only letters"),
+    body("pin")
+      .isNumeric()
+      .isLength({ min: 4, max: 6 })
+      .withMessage("PIN must be 4-6 digits"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+---
+
+## Express-Validator: Validasi Credit Card
+
+```javascript
+app.post(
+  "/add-card",
+  [
+    // Validasi credit card number
+    body("cardNumber")
+      .notEmpty()
+      .withMessage("Card number is required")
+      .isCreditCard()
+      .withMessage("Invalid credit card number"),
+
+    // Validasi CVV
+    body("cvv")
+      .isNumeric()
+      .withMessage("CVV must be numeric")
+      .isLength({ min: 3, max: 4 })
+      .withMessage("CVV must be 3-4 digits"),
+
+    // Validasi expiry date (MM/YY format)
+    body("expiryDate")
+      .matches(/^(0[1-9]|1[0-2])\/([0-9]{2})$/)
+      .withMessage("Expiry date must be in MM/YY format"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    res.json({ success: true, message: "Card added" });
+  },
+);
+```
+
+---
+
+## Express-Validator: Validasi JSON
+
+```javascript
+app.post(
+  "/save-config",
+  [
+    body("config").isJSON().withMessage("Config must be valid JSON"),
+    body("settings").custom((value) => {
+      const parsed = JSON.parse(value);
+      if (!parsed.hasOwnProperty("theme")) throw new Error("Must have theme");
+      return true;
+    }),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+---
+
+## Express-Validator: Validasi IP Address
+
+```javascript
+app.post(
+  "/whitelist-ip",
+  [
+    body("ipv4").isIP(4).withMessage("Must be valid IPv4"),
+    body("ipv6").optional().isIP(6).withMessage("Must be valid IPv6"),
+    body("ipAddress").isIP().withMessage("Must be valid IP address"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+---
+
+## Express-Validator: Validasi dengan Optional
+
+```javascript
+app.post(
+  "/update-profile",
+  [
+    body("name").notEmpty().withMessage("Name is required"),
+    body("bio")
+      .optional()
+      .isLength({ max: 200 })
+      .withMessage("Bio max 200 chars"),
+    body("newsletter").optional({ checkFalsy: true }).isBoolean().toBoolean(),
+    body("middleName").optional({ nullable: true }).isString(),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+---
+
+## Express-Validator: Validasi Conditional
+
+```javascript
+app.post(
+  "/checkout",
+  [
+    // Validasi berdasarkan kondisi
+    body("shippingAddress")
+      .if(body("deliveryType").equals("delivery"))
+      .notEmpty()
+      .withMessage("Shipping address required for delivery"),
+
+    // Validasi saling bergantung
+    body("password")
+      .if((value, { req }) => req.body.changePassword === true)
+      .notEmpty()
+      .withMessage("Password required when changing password"),
+
+    // Nested object validation
+    body("address.street")
+      .if(body("hasAddress").equals("true"))
+      .notEmpty()
+      .withMessage("Street is required"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    res.json({ success: true, message: "Checkout successful" });
+  },
+);
+```
+
+---
+
+## Express-Validator: Validasi Lengkap (Kombinasi)
+
+```javascript
+app.post(
+  "/register",
+  [
+    body("username").trim().isLength({ min: 3, max: 20 }).isAlphanumeric(),
+    body("email").trim().isEmail().normalizeEmail(),
+    body("password")
+      .isLength({ min: 8 })
+      .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
+    body("age").isInt({ min: 18, max: 100 }),
+    body("phone").isMobilePhone("id-ID"),
+    body("terms").equals("true"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty())
+      return res.status(400).json({ errors: errors.array() });
+    res.json({ success: true });
+  },
+);
+```
+
+✅ **Keuntungan Express-Validator**: Clean, chainable, reusable
+
+---
+
+## Perbandingan: Vanilla vs Express-Validator
+
+| Aspek                | Vanilla JavaScript         | Express-Validator               |
+| -------------------- | -------------------------- | ------------------------------- |
+| **Setup**            | Tidak perlu install        | `npm install express-validator` |
+| **Kode**             | Verbose, banyak if-else    | Chainable, concise              |
+| **Reusability**      | Harus manual refactor      | Built-in middleware pattern     |
+| **Validators**       | Harus buat sendiri         | 40+ built-in validators         |
+| **Error Messages**   | Manual array push          | `.withMessage()` chainable      |
+| **Sanitization**     | Manual regex/replace       | Built-in sanitizers             |
+| **Async Validation** | Manual promise handling    | Built-in async support          |
+| **Maintainability**  | Susah maintain             | Mudah maintain                  |
+| **Best untuk**       | Pembelajaran, proyek kecil | Production, proyek besar        |
+
+---
+
+## Kapan Menggunakan Vanilla JavaScript?
+
+✅ **Gunakan Vanilla JavaScript ketika:**
+
+- Belajar konsep dasar validation
+- Proyek sangat sederhana (1-2 form)
+- Tidak mau tambah dependency
+- Custom validation yang sangat spesifik
+- Butuh kontrol penuh atas proses
+
+❌ **Hindari Vanilla JavaScript ketika:**
+
+- Proyek production/enterprise
+- Banyak form dengan validation kompleks
+- Butuh consistency di seluruh aplikasi
+- Tim besar yang perlu standar
+
+---
+
+## Kapan Menggunakan Express-Validator?
+
+✅ **Gunakan Express-Validator ketika:**
+
+- Proyek production/enterprise
+- Banyak endpoint dengan validation
+- Butuh validation library yang proven
+- Tim yang perlu standar validation
+- Perlu async validation (cek database)
+- Mau kode yang clean dan maintainable
+
+❌ **Hindari Express-Validator ketika:**
+
+- Bukan menggunakan Express.js
+- Proyek sangat minimal (overkill)
+- Mau zero dependencies
+
+---
+
+## Contoh Perbandingan: Email Validation
+
+**Vanilla JavaScript:**
+
+```javascript
+app.post("/subscribe", (req, res) => {
+  const { email } = req.body;
+  const errors = [];
+
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  if (!email || email.trim() === "") {
+    errors.push({ field: "email", message: "Email is required" });
+  } else if (!emailRegex.test(email)) {
+    errors.push({ field: "email", message: "Email format is invalid" });
+  }
+
+  if (errors.length > 0) {
+    return res.status(400).json({ success: false, errors });
+  }
+
+  res.json({ success: true });
+});
+```
+
+**Express-Validator:**
+
+```javascript
+const { body, validationResult } = require("express-validator");
+
+app.post(
+  "/subscribe",
+  [
+    body("email")
+      .notEmpty()
+      .withMessage("Email is required")
+      .isEmail()
+      .withMessage("Email format is invalid"),
+  ],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ success: false, errors: errors.array() });
+    }
+
+    res.json({ success: true });
+  },
+);
+```
+
+---
+
+## Express-Validator: Daftar Validators Populer
+
+| Validator           | Kegunaan                 | Contoh                                       |
+| ------------------- | ------------------------ | -------------------------------------------- |
+| `.notEmpty()`       | Field tidak boleh kosong | `body('name').notEmpty()`                    |
+| `.isEmail()`        | Validasi format email    | `body('email').isEmail()`                    |
+| `.isURL()`          | Validasi format URL      | `body('website').isURL()`                    |
+| `.isInt()`          | Validasi integer         | `body('age').isInt({ min: 18 })`             |
+| `.isFloat()`        | Validasi decimal         | `body('price').isFloat({ min: 0 })`          |
+| `.isLength()`       | Validasi panjang string  | `body('name').isLength({ min: 3, max: 20 })` |
+| `.isAlpha()`        | Hanya huruf              | `body('name').isAlpha()`                     |
+| `.isAlphanumeric()` | Huruf dan angka          | `body('username').isAlphanumeric()`          |
+| `.isNumeric()`      | Hanya angka              | `body('pin').isNumeric()`                    |
+| `.isMobilePhone()`  | Validasi nomor HP        | `body('phone').isMobilePhone('id-ID')`       |
+| `.isDate()`         | Validasi tanggal         | `body('birthdate').isDate()`                 |
+| `.isBoolean()`      | Validasi boolean         | `body('terms').isBoolean()`                  |
+| `.isArray()`        | Validasi array           | `body('tags').isArray()`                     |
+| `.isCreditCard()`   | Validasi kartu kredit    | `body('card').isCreditCard()`                |
+| `.isIP()`           | Validasi IP address      | `body('ip').isIP()`                          |
+
+---
+
+## Express-Validator: Daftar Sanitizers Populer
+
+| Sanitizer            | Kegunaan                       | Contoh                                |
+| -------------------- | ------------------------------ | ------------------------------------- |
+| `.trim()`            | Hapus whitespace di awal/akhir | `body('name').trim()`                 |
+| `.escape()`          | Escape HTML characters         | `body('comment').escape()`            |
+| `.normalizeEmail()`  | Normalisasi format email       | `body('email').normalizeEmail()`      |
+| `.toLowerCase()`     | Konversi ke huruf kecil        | `body('email').toLowerCase()`         |
+| `.toUpperCase()`     | Konversi ke huruf besar        | `body('code').toUpperCase()`          |
+| `.toBoolean()`       | Konversi ke boolean            | `body('active').toBoolean()`          |
+| `.toInt()`           | Konversi ke integer            | `body('age').toInt()`                 |
+| `.toFloat()`         | Konversi ke float              | `body('price').toFloat()`             |
+| `.toDate()`          | Konversi ke Date object        | `body('date').toDate()`               |
+| `.whitelist()`       | Hanya karakter yang diizinkan  | `body('code').whitelist('A-Za-z0-9')` |
+| `.blacklist()`       | Hapus karakter tertentu        | `body('name').blacklist('!@#$')`      |
+| `.customSanitizer()` | Custom sanitization            | `body('phone').customSanitizer(...)`  |
+
+---
+
+## Express-Validator: Sanitization (Pembersihan Input)
+
+**Sanitization** membersihkan input dari karakter berbahaya
+
+```javascript
+const { body } = require("express-validator");
+
+app.post(
+  "/submit",
+  [
+    // Trim whitespace
+    body("name").trim().notEmpty(),
+
+    // Lowercase
+    body("email").trim().normalizeEmail().toLowerCase(),
+
+    // Remove HTML tags (escape)
+    body("comment").trim().escape(),
+
+    // Blacklist characters
+    body("username").trim().blacklist(" @#$%"),
+
+    // Whitelist characters only
+    body("code").trim().whitelist("A-Za-z0-9"),
+
+    // Convert to boolean
+    body("newsletter").toBoolean(),
+
+    // Convert to integer
+    body("age").toInt(),
+
+    // Custom sanitization
+    body("phone").customSanitizer((value) => {
+      return value.replace(/[^\d]/g, ""); // Keep digits only
+    }),
+  ],
+  (req, res) => {
+    // Data sudah clean dan sanitized
+    res.json({ success: true });
+  },
+);
 ```
 
 ---
@@ -214,32 +1025,14 @@ body("username").matches(/^[a-zA-Z0-9_]+$/);
 const { body } = require("express-validator");
 
 const registerValidation = [
-  body("username")
-    .trim()
-    .isLength({ min: 3, max: 20 })
-    .withMessage("Username must be 3-20 characters")
-    .isAlphanumeric()
-    .withMessage("Username must contain only letters and numbers"),
-
-  body("email")
-    .trim()
-    .isEmail()
-    .withMessage("Must be a valid email")
-    .normalizeEmail(),
-
+  body("username").trim().isLength({ min: 3, max: 20 }).isAlphanumeric(),
+  body("email").trim().isEmail().normalizeEmail(),
   body("password")
     .isLength({ min: 8 })
-    .withMessage("Password must be at least 8 characters")
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage("Password must contain uppercase, lowercase, and number"),
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/),
 ];
 
-const loginValidation = [
-  body("email").trim().isEmail().withMessage("Must be a valid email"),
-  body("password").notEmpty().withMessage("Password is required"),
-];
-
-module.exports = { registerValidation, loginValidation };
+module.exports = { registerValidation };
 ```
 
 ---
@@ -247,16 +1040,9 @@ module.exports = { registerValidation, loginValidation };
 ## Express-Validator: Using Middleware
 
 ```javascript
-// routes/userRoutes.js
-const express = require("express");
-const {
-  registerValidation,
-  loginValidation,
-} = require("../validators/userValidator");
+const { registerValidation } = require("../validators/userValidator");
 const { validationResult } = require("express-validator");
-const router = express.Router();
 
-// Middleware to check validation results
 const checkValidation = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -265,18 +1051,9 @@ const checkValidation = (req, res, next) => {
   next();
 };
 
-// Use validation middleware
 router.post("/register", registerValidation, checkValidation, (req, res) => {
-  // Data sudah valid di sini
   res.json({ message: "Registration successful" });
 });
-
-router.post("/login", loginValidation, checkValidation, (req, res) => {
-  // Data sudah valid di sini
-  res.json({ message: "Login successful" });
-});
-
-module.exports = router;
 ```
 
 ---
@@ -325,312 +1102,46 @@ const registerValidation = [
 
 ---
 
-## Joi - Schema-Based Validation
-
-**Joi adalah library validasi berbasis schema**
-
-```bash
-npm install joi
-```
-
-**Advantages:**
-
-- Schema-based approach
-- More readable untuk struktur kompleks
-- Tidak terikat dengan Express
-- Bisa digunakan untuk validasi umum
-
----
-
-## Joi: Basic Usage
-
-```javascript
-const Joi = require("joi");
-
-// Define schema
-const userSchema = Joi.object({
-  username: Joi.string().alphanum().min(3).max(20).required(),
-
-  email: Joi.string().email().required(),
-
-  password: Joi.string()
-    .min(8)
-    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .required()
-    .messages({
-      "string.pattern.base":
-        "Password must contain uppercase, lowercase, and number",
-    }),
-
-  age: Joi.number().integer().min(18).max(100),
-
-  birthdate: Joi.date().max("now"),
-
-  tags: Joi.array().items(Joi.string()).min(1).max(5),
-
-  terms: Joi.boolean().valid(true).required(),
-});
-
-// Validate data
-const { error, value } = userSchema.validate(req.body, {
-  abortEarly: false, // Return all errors
-});
-
-if (error) {
-  return res.status(400).json({
-    errors: error.details.map((err) => err.message),
-  });
-}
-
-// Use validated data
-console.log(value);
-```
-
----
-
-## Joi: Validation Middleware
-
-```javascript
-// middleware/validateMiddleware.js
-const validateRequest = (schema) => {
-  return (req, res, next) => {
-    const { error, value } = schema.validate(req.body, {
-      abortEarly: false,
-      stripUnknown: true, // Remove unknown fields
-    });
-
-    if (error) {
-      return res.status(400).json({
-        errors: error.details.map((err) => ({
-          field: err.path.join("."),
-          message: err.message,
-        })),
-      });
-    }
-
-    // Replace req.body with validated value
-    req.body = value;
-    next();
-  };
-};
-
-module.exports = validateRequest;
-```
-
-```javascript
-// routes/userRoutes.js
-const validateRequest = require("../middleware/validateMiddleware");
-const { userSchema } = require("../schemas/userSchema");
-
-router.post("/register", validateRequest(userSchema), (req, res) => {
-  // req.body sudah valid dan clean
-  res.json({ message: "Registration successful" });
-});
-```
-
----
-
-## Joi: Advanced Features
-
-```javascript
-const Joi = require("joi");
-
-const advancedSchema = Joi.object({
-  // Conditional validation
-  hasAccount: Joi.boolean(),
-  accountId: Joi.when("hasAccount", {
-    is: true,
-    then: Joi.string().required(),
-    otherwise: Joi.forbidden(),
-  }),
-
-  // Alternative values
-  deliveryMethod: Joi.string().valid("email", "sms", "whatsapp"),
-
-  // Nested objects
-  address: Joi.object({
-    street: Joi.string().required(),
-    city: Joi.string().required(),
-    zipcode: Joi.string().pattern(/^\d{5}$/),
-  }),
-
-  // Custom validation
-  customField: Joi.string().custom((value, helpers) => {
-    if (value === "forbidden") {
-      return helpers.error("any.invalid");
-    }
-    return value;
-  }),
-
-  // References to other fields
-  password: Joi.string().min(8),
-  passwordConfirmation: Joi.string().valid(Joi.ref("password")).required(),
-});
-```
-
----
-
-## Zod - TypeScript-First Validation
-
-**Zod adalah modern schema validation library dengan TypeScript support**
-
-```bash
-npm install zod
-```
-
-**Advantages:**
-
-- TypeScript-first with automatic type inference
-- Zero dependencies
-- Composable schemas
-- Parsing & transformation
-
----
-
-## Zod: Basic Usage
-
-```javascript
-const { z } = require("zod");
-
-// Define schema
-const userSchema = z.object({
-  username: z.string().min(3).max(20),
-
-  email: z.string().email(),
-
-  password: z
-    .string()
-    .min(8)
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Must contain uppercase, lowercase, and number",
-    ),
-
-  age: z.number().int().min(18).max(100),
-
-  tags: z.array(z.string()).min(1).max(5),
-
-  terms: z.boolean().refine((val) => val === true, {
-    message: "Terms must be accepted",
-  }),
-});
-
-// Validate data
-try {
-  const validatedData = userSchema.parse(req.body);
-  // validatedData is fully typed in TypeScript
-  res.json({ message: "Success", data: validatedData });
-} catch (error) {
-  if (error instanceof z.ZodError) {
-    return res.status(400).json({
-      errors: error.errors.map((err) => ({
-        field: err.path.join("."),
-        message: err.message,
-      })),
-    });
-  }
-}
-```
-
----
-
-## Sanitization - Pembersihan Input
-
-**Sanitization** membersihkan input dari karakter berbahaya
+## Express-Validator: Custom Validators
 
 ```javascript
 const { body } = require("express-validator");
+const User = require("../models/User");
 
-app.post(
-  "/submit",
-  [
-    // Trim whitespace
-    body("name").trim(),
-
-    // Lowercase
-    body("email").trim().normalizeEmail().toLowerCase(),
-
-    // Remove HTML tags
-    body("comment").trim().escape(),
-
-    // Blacklist characters
-    body("username").trim().blacklist(" @#$%"),
-
-    // Whitelist characters only
-    body("code").trim().whitelist("A-Za-z0-9"),
-
-    // Custom sanitization
-    body("phone").customSanitizer((value) => {
-      return value.replace(/[^\d]/g, ""); // Keep digits only
+const registerValidation = [
+  body("username")
+    .trim()
+    .isLength({ min: 3, max: 20 })
+    .custom(async (value) => {
+      // Check if username already exists
+      const existingUser = await User.findOne({ username: value });
+      if (existingUser) {
+        throw new Error("Username already taken");
+      }
+      return true;
     }),
-  ],
-  (req, res) => {
-    // Data sudah clean
-  },
-);
-```
 
----
+  body("email")
+    .trim()
+    .isEmail()
+    .normalizeEmail()
+    .custom(async (value) => {
+      // Check if email already exists
+      const existingUser = await User.findOne({ email: value });
+      if (existingUser) {
+        throw new Error("Email already registered");
+      }
+      return true;
+    }),
 
-## Validasi dengan Template Engine
-
-**Menampilkan error di form HTML:**
-
-```javascript
-app.post(
-  "/register",
-  [
-    body("username").notEmpty().withMessage("Username required"),
-    body("email").isEmail().withMessage("Valid email required"),
-    body("password").isLength({ min: 8 }).withMessage("Password min 8 chars"),
-  ],
-  (req, res) => {
-    const errors = validationResult(req);
-
-    if (!errors.isEmpty()) {
-      // Re-render form dengan error messages
-      return res.render("register", {
-        errors: errors.array(),
-        formData: req.body, // Keep user input
-      });
+  body("passwordConfirmation").custom((value, { req }) => {
+    // Check if password and confirmation match
+    if (value !== req.body.password) {
+      throw new Error("Password confirmation does not match");
     }
-
-    // Process registration...
-    res.redirect("/success");
-  },
-);
-```
-
----
-
-## Validasi dengan Template Engine (cont.)
-
-**Template (Handlebars):**
-
-```handlebars
-<form method="POST" action="/register">
-  <div>
-    <label>Username:</label>
-    <input type="text" name="username" value="{{formData.username}}" />
-    {{#each errors}}
-      {{#if (eq this.path "username")}}
-        <span class="error">{{this.msg}}</span>
-      {{/if}}
-    {{/each}}
-  </div>
-
-  <div>
-    <label>Email:</label>
-    <input type="email" name="email" value="{{formData.email}}" />
-    {{#each errors}}
-      {{#if (eq this.path "email")}}
-        <span class="error">{{this.msg}}</span>
-      {{/if}}
-    {{/each}}
-  </div>
-
-  <button type="submit">Register</button>
-</form>
+    return true;
+  }),
+];
 ```
 
 ---
@@ -639,6 +1150,7 @@ app.post(
 
 ```javascript
 const multer = require("multer");
+const path = require("path");
 
 const storage = multer.diskStorage({
   destination: "uploads/",
@@ -682,12 +1194,78 @@ app.post("/upload", upload.single("avatar"), (req, res) => {
 
 ---
 
+## Validasi dengan Template Engine
+
+**Menampilkan error di form HTML:**
+
+```javascript
+app.post(
+  "/register",
+  [body("username").notEmpty(), body("email").isEmail()],
+  (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.render("register", {
+        errors: errors.array(),
+        formData: req.body,
+      });
+    }
+    res.redirect("/success");
+  },
+);
+```
+
+---
+
+## Validasi dengan Template Engine (cont.)
+
+**Template (Handlebars):**
+
+```handlebars
+<form method="POST" action="/register">
+  <div>
+    <label>Username:</label>
+    <input type="text" name="username" value="{{formData.username}}" />
+    {{#each errors}}
+      {{#if (eq this.path "username")}}
+        <span class="error">{{this.msg}}</span>
+      {{/if}}
+    {{/each}}
+  </div>
+  <button type="submit">Register</button>
+</form>
+```
+
+---
+
+## File Upload Validation
+
+```javascript
+const multer = require("multer");
+
+const upload = multer({
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB max
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /jpeg|jpg|png|gif/;
+    const isValid = allowedTypes.test(file.mimetype);
+    cb(isValid ? null : new Error("Only images allowed"), isValid);
+  },
+});
+
+app.post("/upload", upload.single("avatar"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file" });
+  res.json({ filename: req.file.filename });
+});
+```
+
+---
+
 ## Validation Best Practices
 
 ✅ **DO:**
 
 - Validasi di server-side (wajib)
-- Gunakan validation library (express-validator, Joi, Zod)
+- Gunakan validation library (express-validator untuk production)
 - Berikan pesan error yang jelas dan spesifik
 - Sanitize input untuk mencegah XSS
 - Validasi sebelum database operation
@@ -750,28 +1328,10 @@ app.post("/upload", upload.single("avatar"), (req, res) => {
 const { body } = require("express-validator");
 
 const createProductValidation = [
-  body("name")
-    .trim()
-    .notEmpty()
-    .withMessage("Product name required")
-    .isLength({ max: 100 }),
-
-  body("price")
-    .notEmpty()
-    .withMessage("Price required")
-    .isFloat({ min: 0 })
-    .withMessage("Price must be positive"),
-
-  body("stock")
-    .notEmpty()
-    .isInt({ min: 0 })
-    .withMessage("Stock must be non-negative integer"),
-
-  body("category")
-    .notEmpty()
-    .isIn(["electronics", "clothing", "food"])
-    .withMessage("Invalid category"),
-
+  body("name").trim().notEmpty().isLength({ max: 100 }),
+  body("price").isFloat({ min: 0 }),
+  body("stock").isInt({ min: 0 }),
+  body("category").isIn(["electronics", "clothing", "food"]),
   body("description").optional().trim().isLength({ max: 1000 }),
 ];
 
@@ -783,41 +1343,18 @@ module.exports = { createProductValidation };
 ## Contoh Lengkap: Route Implementation
 
 ```javascript
-// routes/productRoutes.js
-const express = require("express");
 const { validationResult } = require("express-validator");
 const { createProductValidation } = require("../validators/productValidator");
-const router = express.Router();
 
 router.post("/products", createProductValidation, async (req, res) => {
-  // Check validation results
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({
-      success: false,
-      errors: errors.array().map((err) => ({
-        field: err.path,
-        message: err.msg,
-      })),
-    });
+    return res.status(400).json({ errors: errors.array() });
   }
 
-  try {
-    // Data is valid, save to database
-    const product = await Product.create(req.body);
-    res.status(201).json({
-      success: true,
-      data: product,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: "Server error",
-    });
-  }
+  const product = await Product.create(req.body);
+  res.status(201).json({ success: true, data: product });
 });
-
-module.exports = router;
 ```
 
 ---
@@ -826,7 +1363,8 @@ module.exports = router;
 
 - **Validation** penting untuk security, data integrity, dan UX
 - **Server-side validation** adalah wajib, client-side adalah bonus
-- **Express-validator** bagus untuk Express, **Joi** untuk schema-based, **Zod** untuk TypeScript
+- **Vanilla JavaScript** - manual tapi memberikan kontrol penuh
+- **Express-validator** - clean, chainable, dan production-ready
 - **Sanitization** membersihkan input dari karakter berbahaya
 - **Custom validators** untuk logika bisnis khusus
 - **Organized validation** dengan middleware yang reusable
@@ -846,7 +1384,7 @@ _paginate: skip
 
 **Resources:**
 
-- express-validator: https://express-validator.github.io
-- Joi: https://joi.dev
-- Zod: https://zod.dev
+- Express-validator: https://express-validator.github.io
+- Express-validator GitHub: https://github.com/express-validator/express-validator
 - OWASP Input Validation: https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html
+- MDN Regular Expressions: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions

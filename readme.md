@@ -64,8 +64,6 @@
 
 ## Pertemuan 4
 
----
-
 ### DBML - Database Markup Language
 
 **Link:** https://ti-iv-p1.github.io/slides/dbml
@@ -79,6 +77,59 @@
 - Menerapkan DBML untuk dokumentasi dan prototyping database
 
 ---
+
+## Pertemuan 5
+
+### Routing di Node.js dan Express.js
+
+**Link:** https://ti-iv-p1.github.io/slides/router-nodejs
+
+**Tujuan Pembelajaran:**
+
+- Memahami konsep routing dalam web application
+- Menguasai cara membuat routes di Express.js
+- Memahami HTTP methods (GET, POST, PUT, DELETE)
+- Mampu mengorganisir routes dengan Express Router
+- Menerapkan route parameters dan query strings
+
+---
+
+## Pertemuan 6
+
+### MVC Pattern di Node.js
+
+**Link:** https://ti-iv-p1.github.io/slides/mvc-nodejs
+
+**Tujuan Pembelajaran:**
+
+- Memahami konsep MVC (Model-View-Controller)
+- Mengerti peran masing-masing komponen MVC
+- Mampu mengimplementasikan MVC di Node.js
+- Menerapkan best practices struktur aplikasi
+
+---
+
+## Pertemuan 7
+
+### Validation di Node.js dan Express.js
+
+**Link:** https://ti-iv-p1.github.io/slides/validation-nodejs
+
+**Tujuan Pembelajaran:**
+
+- Memahami pentingnya validasi input data
+- Menguasai teknik validasi di Node.js
+- Menggunakan library validasi (express-validator, Joi, Zod)
+- Menerapkan validasi untuk form, API, dan database
+- Membuat custom validator
+- Menangani validation errors dengan baik
+- Menerapkan best practices validation
+
+---
+
+## Pertemuan 8 UTS
+
+## MATERI
 
 ### Error Handling di Node.js
 
@@ -126,31 +177,6 @@
 
 ---
 
-### MVC Pattern di Node.js
-
-**Link:** https://ti-iv-p1.github.io/slides/mvc-nodejs
-
-**Tujuan Pembelajaran:**
-
-- Memahami konsep MVC (Model-View-Controller)
-- Mengerti peran masing-masing komponen MVC
-- Mampu mengimplementasikan MVC di Node.js
-- Menerapkan best practices struktur aplikasi
-
-### Routing di Node.js dan Express.js
-
-**Link:** https://ti-iv-p1.github.io/slides/router-nodejs
-
-**Tujuan Pembelajaran:**
-
-- Memahami konsep routing dalam web application
-- Menguasai cara membuat routes di Express.js
-- Memahami HTTP methods (GET, POST, PUT, DELETE)
-- Mampu mengorganisir routes dengan Express Router
-- Menerapkan route parameters dan query strings
-
----
-
 ### Autentikasi di Node.js
 
 **Link:** https://ti-iv-p1.github.io/slides/autentikasi-nodejs
@@ -195,20 +221,6 @@
 - Menerapkan best practices security
 
 ---
-
-### Validation di Node.js dan Express.js
-
-**Link:** https://ti-iv-p1.github.io/slides/validation-nodejs
-
-**Tujuan Pembelajaran:**
-
-- Memahami pentingnya validasi input data
-- Menguasai teknik validasi di Node.js
-- Menggunakan library validasi (express-validator, Joi, Zod)
-- Menerapkan validasi untuk form, API, dan database
-- Membuat custom validator
-- Menangani validation errors dengan baik
-- Menerapkan best practices validation
 
 ---
 
